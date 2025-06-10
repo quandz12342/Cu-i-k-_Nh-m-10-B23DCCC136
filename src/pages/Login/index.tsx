@@ -20,11 +20,17 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <LoginForm
-      title="Quản lý mượn đồ"
-      subTitle="Đăng nhập để tiếp tục"
-      onFinish={handleLogin}
-    >
+      <LoginForm
+        title="Quản lý mượn đồ"
+        subTitle="Đăng nhập để tiếp tục"
+        onFinish={handleLogin}
+        submitter={{
+        searchConfig: {
+        submitText: 'Đăng nhập', // 👈 đổi nút
+       },
+      }}
+      >
+
       <ProFormText
         name="username"
         fieldProps={{ prefix: <UserOutlined /> }}

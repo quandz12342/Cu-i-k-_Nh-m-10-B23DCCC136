@@ -1,42 +1,39 @@
+import React, { useEffect, useState } from 'react';
 import { Table, Button, message } from 'antd';
-import { getBorrowedList, returnBook } from '@/services/borrow';
-import React, { useState, useEffect } from 'react';
+import { getBorrowedBooks, returnBook } from '@/services/book';
 
-export default () => {
-  const [data, setData] = useState<{ title: string; borrowedDate: string }[]>([]);
+export default function BorrowedList() {
+  const [borrowed, setBorrowed] = useState<any[]>([]);
 
-  const refresh = () => {
-    setData(getBorrowedList());
-  };
-
-  const handleReturn = (title: string) => {
-    returnBook(title);
-    message.success(`Đã trả sách: ${title}`);
-    refresh();
+  const fetch = () => {
+    const data = getBorrowedBooks();
+    setBorrowed(data);
   };
 
   useEffect(() => {
-    refresh();
+    fetch();
   }, []);
+
+  const onReturn = (id: number) => {
+    returnBook(id);
+    message.success('Đã trả sách');
+    fetch();
+  };
 
   return (
     <div style={{ padding: 24 }}>
-      <Table
-        columns={[
-          { title: 'Tên sách', dataIndex: 'title' },
-          { title: 'Ngày mượn', dataIndex: 'borrowedDate' },
-          {
-            title: 'Thao tác',
-            render: (_, record) => (
-              <Button danger onClick={() => handleReturn(record.title)}>
-                Trả
-              </Button>
-            ),
-          },
-        ]}
-        dataSource={data}
-        rowKey="title"
-      />
+      <h2>Sách đã mượn</h2>
+      <Table dataSource={borrowed} rowKey="id" pagination={false}>
+        <Table.Column title="Tên sách" dataIndex="title" />
+        <Table.Column title="Tác giả" dataIndex="author" />
+        <Table.Column title="Thể loại" dataIndex="category" />
+        <Table.Column
+          title="Hành động"
+          render={(_, record: any) => (
+            <Button danger onClick={() => onReturn(record.id)}>Trả</Button>
+          )}
+        />
+      </Table>
     </div>
   );
-};
+}

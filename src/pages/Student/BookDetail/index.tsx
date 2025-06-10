@@ -1,30 +1,50 @@
-import { Descriptions, Button, message } from 'antd';
-import { borrowBook } from '@/services/borrow';
+import React, { useEffect, useState } from 'react';
+import { Table, Button, message } from 'antd';
+import { getBooks, borrowBook } from '@/services/book';
 
-export default () => {
-  const book = {
-    title: 'Doraemon Tập 1',
-    author: 'Fujiko F. Fujio',
-    category: 'Truyện tranh',
-    description: 'Câu chuyện về chú mèo máy đến từ tương lai.',
+export default function BookDetailPage() {
+  const [books, setBooks] = useState<any[]>([]);
+
+  const fetch = () => {
+    const res = getBooks();
+    setBooks(res);
   };
 
-  const handleBorrow = () => {
-    borrowBook({ title: book.title, borrowedDate: new Date().toISOString().split('T')[0] });
-    message.success('Đã mượn sách thành công!');
+  useEffect(() => {
+    fetch();
+  }, []);
+
+  const onBorrow = (book: any) => {
+    const success = borrowBook(book);
+    if (success) {
+      message.success('Mượn sách thành công');
+      fetch();
+    } else {
+      message.error('Không thể mượn sách');
+    }
   };
 
   return (
     <div style={{ padding: 24 }}>
-      <Descriptions title="Chi tiết sách">
-        <Descriptions.Item label="Tên sách">{book.title}</Descriptions.Item>
-        <Descriptions.Item label="Tác giả">{book.author}</Descriptions.Item>
-        <Descriptions.Item label="Thể loại">{book.category}</Descriptions.Item>
-        <Descriptions.Item label="Mô tả">{book.description}</Descriptions.Item>
-      </Descriptions>
-      <Button type="primary" style={{ marginTop: 16 }} onClick={handleBorrow}>
-        Mượn ngay
-      </Button>
+      <h2>Danh sách sách có sẵn</h2>
+      <Table dataSource={books} rowKey="id" pagination={false}>
+        <Table.Column title="Tên sách" dataIndex="title" />
+        <Table.Column title="Tác giả" dataIndex="author" />
+        <Table.Column title="Thể loại" dataIndex="category" />
+        <Table.Column title="Số lượng" dataIndex="quantity" />
+        <Table.Column
+          title="Hành động"
+          render={(_, record: any) => (
+            <Button
+              type="primary"
+              disabled={record.quantity <= 0}
+              onClick={() => onBorrow(record)}
+            >
+              Mượn
+            </Button>
+          )}
+        />
+      </Table>
     </div>
   );
-};
+}
